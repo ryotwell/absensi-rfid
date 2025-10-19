@@ -7,30 +7,38 @@ require_once 'bootstrap.php';
 $error_message = '';
 
 if(isset($_SESSION['user'])) {
-    return redirectTo('/dashboard.php');
+    return redirectTo('dashboard.php');
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = htmlspecialchars($_POST['username']);
-    $password = htmlspecialchars($_POST['password']);
+    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
 
-    // Query untuk mengambil data admin berdasarkan username
-    $query = "SELECT * FROM admin WHERE username = ?";
-    $connection = Database::getConnection();
+    if ($username === '' || $password === '') {
+        $error_message = 'Username dan password harus diisi.';
+    } else {
+        $query = "SELECT * FROM admin WHERE username = ?";
+        $connection = Database::getConnection();
 
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    $row = $result->fetch_assoc();
-
-    $_SESSION['user'] = [
-        'id' => $row['id'],
-        'username' => $row['username'],
-    ];
-
-    return redirectTo('/dashboard.php');
+        if ($row = $result->fetch_assoc()) {
+            if (password_verify($password, $row['password'])) {
+                $_SESSION['user'] = [
+                    'id' => $row['id'],
+                    'username' => $row['username'],
+                ];
+                return redirectTo('/dashboard.php');
+            } else {
+                $error_message = 'Password salah.';
+            }
+        } else {
+            $error_message = 'Username tidak ditemukan.';
+        }
+    }
 }
 
 ?>
