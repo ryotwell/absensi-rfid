@@ -6,4 +6,4 @@ session_start();
 
 unset($_SESSION['user']);
 
-return redirectTo('/login.php');
+return redirectTo('login.php');

@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     'id' => $row['id'],
                     'username' => $row['username'],
                 ];
-                return redirectTo('/dashboard.php');
+                return redirectTo('dashboard.php');
             } else {
                 $error_message = 'Password salah.';
             }
