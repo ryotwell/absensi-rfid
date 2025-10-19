@@ -50,26 +50,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Admin Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --color-bg: #f5f7fa;
+            --color-container: #ffffff;
+            --color-shadow: rgba(0, 0, 0, 0.1);
+            --color-heading: #20354b;
+            --color-label: #495057;
+            --color-border: #ced4da;
+            --color-btn: #007bff;
+            --color-btn-hover: #0056b3;
+            --color-error: #dc3545;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f5f7fa;
+            background-color: var(--color-bg);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            transition: background 0.3s;
         }
         .login-container {
-            background-color: #ffffff;
+            background-color: var(--color-container);
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px var(--color-shadow);
             width: 100%;
             max-width: 350px;
         }
+        .logo-pemda {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .logo-pemda img {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+        }
         h2 {
             text-align: center;
-            color: #20354b;
+            color: var(--color-heading);
             margin-bottom: 30px;
         }
         .form-group {
@@ -79,19 +101,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #495057;
+            color: var(--color-label);
         }
         input[type="text"], input[type="password"] {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ced4da;
+            border: 1px solid var(--color-border);
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 16px;
+            background: transparent;
+            color: inherit;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
         button {
             width: 100%;
-            background-color: #007bff;
+            background-color: var(--color-btn);
             color: white;
             padding: 12px 20px;
             border: none;
@@ -102,24 +127,96 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: var(--color-btn-hover);
         }
         .error-message {
-            color: #dc3545;
+            color: var(--color-error);
             margin-bottom: 15px;
             text-align: center;
             font-weight: 500;
         }
+
+        /* Dark Mode Styles */
+        body.darkmode {
+            --color-bg: #191c20;
+            --color-container: #23272f;
+            --color-shadow: rgba(0,0,0,0.38);
+            --color-heading: #e8eaee;
+            --color-label: #c9ced7;
+            --color-border: #454a51;
+            --color-btn: #1e90ff;
+            --color-btn-hover: #1569c7;
+            --color-error: #ff6363;
+            color: #e8eaee;
+        }
+        body.darkmode .login-container {
+            color: #e8eaee;
+        }
+        body.darkmode input[type="text"], 
+        body.darkmode input[type="password"] {
+            background: #252932;
+            color: #e8eaee;
+            border-color: #454a51;
+        }
+        body.darkmode h2 {
+            color: var(--color-heading);
+        }
+        body.darkmode label {
+            color: var(--color-label);
+        }
+        body.darkmode .error-message {
+            color: var(--color-error);
+        }
+
+        .toggle-darkmode-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            color: #555;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 99;
+            transition: color 0.2s;
+        }
+        .toggle-darkmode-btn .icon {
+            font-size: 20px;
+        }
+        body.darkmode .toggle-darkmode-btn {
+            color: #eee;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px 8px;
+            }
+            .toggle-darkmode-btn {
+                top: 15px;
+                right: 10px;
+                font-size: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-
     <div class="login-container">
+        <div class="logo-pemda">
+            <img src="./asset/pemda.png" alt="Pemda Lotim Logo">
+            <img src="./asset/kkn-logo.jpg" alt="Pemda Lotim Logo">
+        </div>
         <h2>🔑 Admin Login</h2>
         <?php if (!empty($error_message)): ?>
             <div class="error-message"><?php echo $error_message; ?></div>
         <?php endif; ?>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+            <button id="toggleDark" style="margin-bottom: 15px;" title="Toggle dark mode" type="button">
+                <span id="darkmode-icon" class="icon">🌙</span>
+                <span id="toggle-label">Dark Mode</span>
+            </button>
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
@@ -131,6 +228,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit">Login</button>
         </form>
     </div>
+
+    <script>
+        // DARK MODE TOGGLE LOGIC FOR LOGIN PAGE
+        (function () {
+            const preferDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            let isDark = false;
+
+            // Set initial mode
+            if (localStorage.getItem('darkmode') === '1') {
+                document.body.classList.add('darkmode');
+                isDark = true;
+            } else if (localStorage.getItem('darkmode') === '0') {
+                document.body.classList.remove('darkmode');
+                isDark = false;
+            } else if (preferDark) {
+                document.body.classList.add('darkmode');
+                isDark = true;
+            }
+
+            function updateBtn(dark) {
+                let icon = document.getElementById("darkmode-icon");
+                let label = document.getElementById("toggle-label");
+                if (dark) {
+                    icon.textContent = "☀️";
+                    label.textContent = "Light Mode";
+                } else {
+                    icon.textContent = "🌙";
+                    label.textContent = "Dark Mode";
+                }
+            }
+            updateBtn(document.body.classList.contains('darkmode'));
+
+            document.getElementById('toggleDark').addEventListener('click', function () {
+                const isCurrentlyDark = document.body.classList.contains('darkmode');
+                if (isCurrentlyDark) {
+                    document.body.classList.remove('darkmode');
+                    localStorage.setItem('darkmode', '0');
+                } else {
+                    document.body.classList.add('darkmode');
+                    localStorage.setItem('darkmode', '1');
+                }
+                updateBtn(document.body.classList.contains('darkmode'));
+            });
+
+            // If class is changed by external means, update button
+            const observer = new MutationObserver(function () {
+                updateBtn(document.body.classList.contains('darkmode'));
+            });
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        })();
+    </script>
 
 </body>
 </html>
