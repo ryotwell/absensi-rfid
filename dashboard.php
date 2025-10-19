@@ -35,12 +35,9 @@ $total_karyawan = $result_total_karyawan->fetch_assoc()['total'] ?? 0;
 $sql_hadir_keduanya = "
     SELECT COUNT(DISTINCT k.uid) AS jumlah
     FROM karyawan k
-    -- PERBAIKAN: Ganti ap.waktu menjadi ap.tanggal_absen
     INNER JOIN absen_pagi ap ON k.uid = ap.uid AND ap.tanggal_absen = '$today'
-    -- PERBAIKAN: Ganti asg.waktu menjadi asg.tanggal_absen
     INNER JOIN absen_siang asg ON k.uid = asg.uid AND asg.tanggal_absen = '$today'
 ";
-// Baris 21 yang menghasilkan error telah diperbaiki di atas.
 $result_hadir_keduanya = $conn->query($sql_hadir_keduanya);
 $hadir_keduanya = $result_hadir_keduanya->fetch_assoc()['jumlah'] ?? 0;
 
@@ -48,9 +45,7 @@ $hadir_keduanya = $result_hadir_keduanya->fetch_assoc()['jumlah'] ?? 0;
 $sql_hanya_pagi = "
     SELECT COUNT(DISTINCT k.uid) AS jumlah
     FROM karyawan k
-    -- PERBAIKAN: Ganti ap.waktu menjadi ap.tanggal_absen
     INNER JOIN absen_pagi ap ON k.uid = ap.uid AND ap.tanggal_absen = '$today'
-    -- PERBAIKAN: Ganti asg.waktu menjadi asg.tanggal_absen
     LEFT JOIN absen_siang asg ON k.uid = asg.uid AND asg.tanggal_absen = '$today'
     WHERE asg.uid IS NULL
 ";
@@ -60,9 +55,7 @@ $hanya_pagi = $result_hanya_pagi->fetch_assoc()['jumlah'] ?? 0;
 $sql_hanya_siang = "
     SELECT COUNT(DISTINCT k.uid) AS jumlah
     FROM karyawan k
-    -- PERBAIKAN: Ganti asg.waktu menjadi asg.tanggal_absen
     INNER JOIN absen_siang asg ON k.uid = asg.uid AND asg.tanggal_absen = '$today'
-    -- PERBAIKAN: Ganti ap.waktu menjadi ap.tanggal_absen
     LEFT JOIN absen_pagi ap ON k.uid = ap.uid AND ap.tanggal_absen = '$today'
     WHERE ap.uid IS NULL
 ";
@@ -99,12 +92,9 @@ $sql_sudah_absen_pagi = "
     SELECT 
         k.nama, 
         k.uid, 
-        -- PERBAIKAN: Ganti ap.waktu menjadi ap.jam_absen
         ap.jam_absen AS waktu_absen 
     FROM karyawan k
-    -- PERBAIKAN: Ganti DATE(ap.waktu) menjadi ap.tanggal_absen
     INNER JOIN absen_pagi ap ON k.uid = ap.uid AND ap.tanggal_absen = '$today'
-    -- PERBAIKAN: Ganti ORDER BY ap.waktu menjadi ORDER BY ap.jam_absen
     ORDER BY ap.jam_absen ASC
 ";
 $result_sudah_absen_pagi = $conn->query($sql_sudah_absen_pagi);
@@ -114,13 +104,11 @@ $sql_belum_absen_pagi_detail = "
         k.nama, 
         k.uid
     FROM karyawan k
-    -- PERBAIKAN: Ganti DATE(ap.waktu) menjadi ap.tanggal_absen
     LEFT JOIN absen_pagi ap ON k.uid = ap.uid AND ap.tanggal_absen = '$today'
     WHERE ap.uid IS NULL
     ORDER BY k.nama ASC
 ";
 $result_belum_absen_pagi_detail = $conn->query($sql_belum_absen_pagi_detail);
-
 
 // =================================================================
 // 3. Kueri Data Tabel Siang
@@ -129,12 +117,9 @@ $sql_sudah_absen_siang = "
     SELECT 
         k.nama, 
         k.uid, 
-        -- PERBAIKAN: Ganti asg.waktu menjadi asg.jam_absen
         asg.jam_absen AS waktu_absen 
     FROM karyawan k
-    -- PERBAIKAN: Ganti DATE(asg.waktu) menjadi asg.tanggal_absen
     INNER JOIN absen_siang asg ON k.uid = asg.uid AND asg.tanggal_absen = '$today'
-    -- PERBAIKAN: Ganti ORDER BY asg.waktu menjadi ORDER BY asg.jam_absen
     ORDER BY asg.jam_absen ASC
 ";
 $result_sudah_absen_siang = $conn->query($sql_sudah_absen_siang);
@@ -144,7 +129,6 @@ $sql_belum_absen_siang_detail = "
         k.nama, 
         k.uid
     FROM karyawan k
-    -- PERBAIKAN: Ganti DATE(asg.waktu) menjadi asg.tanggal_absen
     LEFT JOIN absen_siang asg ON k.uid = asg.uid AND asg.tanggal_absen = '$today'
     WHERE asg.uid IS NULL
     ORDER BY k.nama ASC
@@ -165,7 +149,6 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 
     <style>
-        /* Variabel Warna dan CSS umum */
         :root {
             --color-sidebar-dark: #20354b;
             --color-main-bg: #f5f7fa;
@@ -175,6 +158,85 @@ $conn->close();
             --color-success: #28a745;
             --color-danger: #dc3545;
             --color-info: #17a2b8;
+        }
+
+        /* DARK MODE OVERRIDES */
+        body.darkmode, .darkmode body {
+            --color-sidebar-dark: #171e29;
+            --color-main-bg: #181c1f;
+            --color-accent-blue: #4695fa;
+            --color-text-dark: #ecf0f2;
+            --color-card-bg: #232a34;
+            --color-success: #50e878;
+            --color-danger: #ff647d;
+            --color-info: #51c6ff;
+            background-color: var(--color-main-bg) !important;
+            color: var(--color-text-dark) !important;
+        }
+
+        .darkmode .sidebar,
+        body.darkmode .sidebar {
+            background-color: var(--color-sidebar-dark) !important;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.25);
+        }
+        .darkmode .sidebar h2,
+        .darkmode .sidebar a,
+        body.darkmode .sidebar h2,
+        body.darkmode .sidebar a {
+            color: #ecf0f2 !important;
+        }
+        .darkmode .sidebar a.active,
+        body.darkmode .sidebar a.active {
+            background-color: #254378 !important;
+        }
+        .darkmode .main,
+        body.darkmode .main {
+            background-color: var(--color-main-bg) !important;
+            color: var(--color-text-dark) !important;
+        }
+        .darkmode .stat-card,
+        .darkmode .table-container,
+        .darkmode .chart-box,
+        body.darkmode .stat-card,
+        body.darkmode .table-container,
+        body.darkmode .chart-box {
+            background: var(--color-card-bg) !important;
+            color: var(--color-text-dark) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .darkmode .stat-card h3, .darkmode .table-container h3, body.darkmode .stat-card h3, body.darkmode .table-container h3 {
+            color: #b1bed1 !important;
+        }
+        .darkmode .stat-card p, .darkmode .gauge-label, body.darkmode .stat-card p, body.darkmode .gauge-label {
+            color: var(--color-text-dark) !important;
+        }
+        .darkmode .styled-table thead tr,
+        body.darkmode .styled-table thead tr {
+            background-color: #1f2a35 !important;
+            color: #fff !important;
+        }
+        .darkmode .styled-table tbody tr:nth-of-type(even), body.darkmode .styled-table tbody tr:nth-of-type(even) {
+            background-color: #202934 !important;
+        }
+        .darkmode .styled-table th,
+        .darkmode .styled-table td,
+        body.darkmode .styled-table th,
+        body.darkmode .styled-table td {
+            border: 1px solid #425066 !important;
+            color: var(--color-text-dark) !important;
+        }
+        .darkmode .styled-table tbody tr:hover,
+        body.darkmode .styled-table tbody tr:hover {
+            background-color: #222e3d !important;
+        }
+        .darkmode .date-info, body.darkmode .date-info {
+            color: #9eb2c8 !important;
+        }
+        .darkmode .status-hadir {
+            color: var(--color-success) !important;
+        }
+        .darkmode .status-belum {
+            color: var(--color-danger) !important;
         }
 
         body {
@@ -248,10 +310,8 @@ $conn->close();
             font-weight: 500;
         }
 
-        /* Modifikasi stats-grid untuk 7 card */
         .stats-grid {
             display: grid;
-            /* Memastikan kolom adaptif, min 180px */
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
@@ -335,7 +395,6 @@ $conn->close();
             margin-top: 10px;
         }
 
-        /* Gaya Tabel */
         .table-section {
             margin-top: 50px;
         }
@@ -399,10 +458,43 @@ $conn->close();
             color: var(--color-danger);
             font-weight: 600;
         }
+
+        /* Dark mode toggle button */
+        .dark-toggle-btn {
+            position: fixed;
+            top: 18px;
+            right: 32px;
+            z-index: 100;
+            background: var(--color-card-bg);
+            color: var(--color-text-dark);
+            border: none;
+            outline: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border-radius: 24px;
+            padding: 7px 22px 7px 14px;
+            cursor: pointer;
+            font-size: 15px;
+            font-family: inherit;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .darkmode .dark-toggle-btn, body.darkmode .dark-toggle-btn {
+            background: #1e262f;
+            color: #d6dbdf;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 
 <body>
+    <button class="dark-toggle-btn" id="toggleDark" type="button" aria-label="Toggle dark mode">
+        <i class="bi bi-moon"></i>
+        <span id="toggle-label">Dark Mode</span>
+    </button>
+
     <div class="sidebar" style="width: 230px; background: #2c3e50; min-height: 100vh; padding: 15px 0;">
         <div style="display: flex; justify-content: center; align-items: center; margin-top: 5px;">
             <img src="./asset/pemda.png" alt="Pemda Lotim" width="35px" style="padding: 0 5px;">
@@ -625,6 +717,51 @@ $conn->close();
     </div>
 
     <script>
+        // ===================================================
+        // DARK MODE TOGGLE LOGIC
+        // ===================================================
+        (function () {
+            const preferDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            let isDark = false;
+            // Check if saved in localStorage
+            if (localStorage.getItem('darkmode') === '1') {
+                document.body.classList.add('darkmode');
+                isDark = true;
+            } else if (localStorage.getItem('darkmode') === '0') {
+                document.body.classList.remove('darkmode');
+                isDark = false;
+            } else if (preferDark) {
+                document.body.classList.add('darkmode');
+                isDark = true;
+            }
+
+            function darkUpdateBtn(dark) {
+                let btn = document.getElementById("toggleDark");
+                let label = document.getElementById("toggle-label");
+                if (dark) {
+                    btn.querySelector('.bi').className = "bi bi-sun";
+                    label.innerText = 'Light Mode';
+                } else {
+                    btn.querySelector('.bi').className = "bi bi-moon";
+                    label.innerText = 'Dark Mode';
+                }
+            }
+            darkUpdateBtn(isDark);
+
+            document.getElementById('toggleDark').addEventListener('click', function () {
+                isDark = !document.body.classList.contains('darkmode');
+                document.body.classList.toggle('darkmode');
+                localStorage.setItem('darkmode', isDark ? '1' : '0');
+                darkUpdateBtn(isDark);
+            });
+
+            // If page changes class by other means, update button accordingly
+            const observer = new MutationObserver(function () {
+                darkUpdateBtn(document.body.classList.contains('darkmode'));
+            });
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        })();
+
         // ===================================================
         // 1. GAUGE CHART (Dibuat dengan Stacked Bar Vertikal)
         // ===================================================
