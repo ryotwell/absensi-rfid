@@ -1,9 +1,11 @@
 <?php
-include 'db_connect.php';
+require_once 'db_connect.php';
+require_once 'bootstrap.php';
 
-// Mulai session di awal setiap halaman yang memerlukannya
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+session_start();
+
+if(!isset($_SESSION['user'])) {
+    return redirectTo('login.php');
 }
 
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -11,13 +13,6 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
  die("Koneksi gagal: " . $conn->connect_error);
 }
-
-// --- Tambahkan Pemeriksaan Login di sini ---
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== TRUE) {
-    header("location: login.php");
-    exit;
-}
-// --- Akhir Pemeriksaan Login ---
 
 date_default_timezone_set('Asia/Makassar');
 

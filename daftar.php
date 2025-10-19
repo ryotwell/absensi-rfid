@@ -1,31 +1,23 @@
 <?php
 
-include 'db_connect.php';
+require_once 'db_connect.php';
+require_once 'bootstrap.php';
 
-// Mulai session di awal setiap halaman yang memerlukannya
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+session_start();
+
+if (!isset($_SESSION['user'])) {
+    return redirectTo('login.php');
 }
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
- die("Koneksi gagal: " . $conn->connect_error);
+    die("Koneksi gagal: " . $conn->connect_error);
 }
-
-// --- Tambahkan Pemeriksaan Login di sini ---
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== TRUE) {
-    header("location: login.php");
-    exit;
-}
-// --- Akhir Pemeriksaan Login ---
 
 $pesan = '';
 $edit_data = null;
 
-// ===============================
-// 1. LOGIKA CRUD (hapus, edit, tambah)
-// ===============================
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_hapus = $conn->real_escape_string($_GET['id']);
     $conn->query("DELETE FROM karyawan WHERE id='$id_hapus'");
@@ -335,8 +327,6 @@ $uid_terakhir = $conn->query("SELECT uid FROM uid_terakhir WHERE id=1")->fetch_a
         .back-link:hover {
             background-color: #0056b3;
         }
-
-        
     </style>
     <script>
         function konfirmasiHapus(id) {
@@ -437,7 +427,7 @@ $uid_terakhir = $conn->query("SELECT uid FROM uid_terakhir WHERE id=1")->fetch_a
             </table>
         </div>
     </div>
-    
+
 </body>
 
 </html>

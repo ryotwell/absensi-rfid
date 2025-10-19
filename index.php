@@ -1,22 +1,13 @@
 <?php
-include 'db_connect.php';
 
-// Mulai session di awal setiap halaman yang memerlukannya
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
+require_once 'db_connect.php';
+require_once 'bootstrap.php';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Koneksi gagal: " . $conn->connect_error);
-}
+session_start();
 
-// --- Tambahkan Pemeriksaan Login di sini ---
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== TRUE) {
-    header("location: login.php");
-    exit;
+if(!isset($_SESSION['user'])) {
+    return redirectTo('login.php');
 }
-// --- Akhir Pemeriksaan Login ---
 
 // --- Proses Pencarian ---
 $search_nama = isset($_GET['search_nama']) ? $conn->real_escape_string($_GET['search_nama']) : '';
