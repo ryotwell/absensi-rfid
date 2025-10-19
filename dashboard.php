@@ -490,11 +490,6 @@ $conn->close();
 </head>
 
 <body>
-    <button class="dark-toggle-btn" id="toggleDark" type="button" aria-label="Toggle dark mode">
-        <i class="bi bi-moon"></i>
-        <span id="toggle-label">Dark Mode</span>
-    </button>
-
     <div class="sidebar" style="width: 230px; background: #2c3e50; min-height: 100vh; padding: 15px 0;">
         <div style="display: flex; justify-content: center; align-items: center; margin-top: 5px;">
             <img src="./asset/pemda.png" alt="Pemda Lotim" width="35px" style="padding: 0 5px;">

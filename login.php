@@ -213,10 +213,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="error-message"><?php echo $error_message; ?></div>
         <?php endif; ?>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-            <button id="toggleDark" style="margin-bottom: 15px;" title="Toggle dark mode" type="button">
-                <span id="darkmode-icon" class="icon">🌙</span>
-                <span id="toggle-label">Dark Mode</span>
-            </button>
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
@@ -228,57 +224,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit">Login</button>
         </form>
     </div>
-
-    <script>
-        // DARK MODE TOGGLE LOGIC FOR LOGIN PAGE
-        (function () {
-            const preferDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            let isDark = false;
-
-            // Set initial mode
-            if (localStorage.getItem('darkmode') === '1') {
-                document.body.classList.add('darkmode');
-                isDark = true;
-            } else if (localStorage.getItem('darkmode') === '0') {
-                document.body.classList.remove('darkmode');
-                isDark = false;
-            } else if (preferDark) {
-                document.body.classList.add('darkmode');
-                isDark = true;
-            }
-
-            function updateBtn(dark) {
-                let icon = document.getElementById("darkmode-icon");
-                let label = document.getElementById("toggle-label");
-                if (dark) {
-                    icon.textContent = "☀️";
-                    label.textContent = "Light Mode";
-                } else {
-                    icon.textContent = "🌙";
-                    label.textContent = "Dark Mode";
-                }
-            }
-            updateBtn(document.body.classList.contains('darkmode'));
-
-            document.getElementById('toggleDark').addEventListener('click', function () {
-                const isCurrentlyDark = document.body.classList.contains('darkmode');
-                if (isCurrentlyDark) {
-                    document.body.classList.remove('darkmode');
-                    localStorage.setItem('darkmode', '0');
-                } else {
-                    document.body.classList.add('darkmode');
-                    localStorage.setItem('darkmode', '1');
-                }
-                updateBtn(document.body.classList.contains('darkmode'));
-            });
-
-            // If class is changed by external means, update button
-            const observer = new MutationObserver(function () {
-                updateBtn(document.body.classList.contains('darkmode'));
-            });
-            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-        })();
-    </script>
 
 </body>
 </html>
