@@ -1,0 +1,12 @@
+vendor/.bin
+node_modules
+.git
+.gitignore
+.idea
+.vscode
+.DS_Store
+*.log
+vendor/dompdf/dompdf/lib/fonts/installed-fonts.json
+.env
+
+

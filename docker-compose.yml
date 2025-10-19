@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: absensi_app
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-absensi_rfid}
+      - DB_USERNAME=${DB_USERNAME:-absensi}
+      - DB_PASSWORD=${DB_PASSWORD:-absensi}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./:/var/www/html
+
+  db:
+    image: mariadb:10.11
+    container_name: absensi_db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE:-absensi_rfid}
+      - MYSQL_USER=${DB_USERNAME:-absensi}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-absensi}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-root}
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
+
+
