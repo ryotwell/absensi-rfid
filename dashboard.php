@@ -149,6 +149,7 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 
     <style>
+        /* Variabel Warna dan CSS umum */
         :root {
             --color-sidebar-dark: #20354b;
             --color-main-bg: #f5f7fa;
@@ -158,85 +159,6 @@ $conn->close();
             --color-success: #28a745;
             --color-danger: #dc3545;
             --color-info: #17a2b8;
-        }
-
-        /* DARK MODE OVERRIDES */
-        body.darkmode, .darkmode body {
-            --color-sidebar-dark: #171e29;
-            --color-main-bg: #181c1f;
-            --color-accent-blue: #4695fa;
-            --color-text-dark: #ecf0f2;
-            --color-card-bg: #232a34;
-            --color-success: #50e878;
-            --color-danger: #ff647d;
-            --color-info: #51c6ff;
-            background-color: var(--color-main-bg) !important;
-            color: var(--color-text-dark) !important;
-        }
-
-        .darkmode .sidebar,
-        body.darkmode .sidebar {
-            background-color: var(--color-sidebar-dark) !important;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.25);
-        }
-        .darkmode .sidebar h2,
-        .darkmode .sidebar a,
-        body.darkmode .sidebar h2,
-        body.darkmode .sidebar a {
-            color: #ecf0f2 !important;
-        }
-        .darkmode .sidebar a.active,
-        body.darkmode .sidebar a.active {
-            background-color: #254378 !important;
-        }
-        .darkmode .main,
-        body.darkmode .main {
-            background-color: var(--color-main-bg) !important;
-            color: var(--color-text-dark) !important;
-        }
-        .darkmode .stat-card,
-        .darkmode .table-container,
-        .darkmode .chart-box,
-        body.darkmode .stat-card,
-        body.darkmode .table-container,
-        body.darkmode .chart-box {
-            background: var(--color-card-bg) !important;
-            color: var(--color-text-dark) !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .darkmode .stat-card h3, .darkmode .table-container h3, body.darkmode .stat-card h3, body.darkmode .table-container h3 {
-            color: #b1bed1 !important;
-        }
-        .darkmode .stat-card p, .darkmode .gauge-label, body.darkmode .stat-card p, body.darkmode .gauge-label {
-            color: var(--color-text-dark) !important;
-        }
-        .darkmode .styled-table thead tr,
-        body.darkmode .styled-table thead tr {
-            background-color: #1f2a35 !important;
-            color: #fff !important;
-        }
-        .darkmode .styled-table tbody tr:nth-of-type(even), body.darkmode .styled-table tbody tr:nth-of-type(even) {
-            background-color: #202934 !important;
-        }
-        .darkmode .styled-table th,
-        .darkmode .styled-table td,
-        body.darkmode .styled-table th,
-        body.darkmode .styled-table td {
-            border: 1px solid #425066 !important;
-            color: var(--color-text-dark) !important;
-        }
-        .darkmode .styled-table tbody tr:hover,
-        body.darkmode .styled-table tbody tr:hover {
-            background-color: #222e3d !important;
-        }
-        .darkmode .date-info, body.darkmode .date-info {
-            color: #9eb2c8 !important;
-        }
-        .darkmode .status-hadir {
-            color: var(--color-success) !important;
-        }
-        .darkmode .status-belum {
-            color: var(--color-danger) !important;
         }
 
         body {
@@ -310,8 +232,10 @@ $conn->close();
             font-weight: 500;
         }
 
+        /* Modifikasi stats-grid untuk 7 card */
         .stats-grid {
             display: grid;
+            /* Memastikan kolom adaptif, min 180px */
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
@@ -395,6 +319,7 @@ $conn->close();
             margin-top: 10px;
         }
 
+        /* Gaya Tabel */
         .table-section {
             margin-top: 50px;
         }
@@ -457,34 +382,6 @@ $conn->close();
         .status-belum {
             color: var(--color-danger);
             font-weight: 600;
-        }
-
-        /* Dark mode toggle button */
-        .dark-toggle-btn {
-            position: fixed;
-            top: 18px;
-            right: 32px;
-            z-index: 100;
-            background: var(--color-card-bg);
-            color: var(--color-text-dark);
-            border: none;
-            outline: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-            border-radius: 24px;
-            padding: 7px 22px 7px 14px;
-            cursor: pointer;
-            font-size: 15px;
-            font-family: inherit;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s, color 0.2s;
-        }
-        .darkmode .dark-toggle-btn, body.darkmode .dark-toggle-btn {
-            background: #1e262f;
-            color: #d6dbdf;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -710,6 +607,116 @@ $conn->close();
         </div>
 
     </div>
+
+    <script>
+        // ===================================================
+        // 1. GAUGE CHART (Dibuat dengan Stacked Bar Vertikal)
+        // ===================================================
+        const progressData = {
+            labels: ['Kehadiran Penuh'],
+            datasets: [{
+                    label: 'Tercapai',
+                    data: [<?php echo $progress_data['present']; ?>],
+                    backgroundColor: 'rgba(0, 123, 255, 1)',
+                    stack: 'Stack 0',
+                },
+                {
+                    label: 'Target Sisa',
+                    data: [<?php echo $progress_data['missing']; ?>],
+                    backgroundColor: 'rgba(233, 236, 239, 1)',
+                    stack: 'Stack 0',
+                }
+            ]
+        };
+
+        const progressConfig = {
+            type: 'bar',
+            data: progressData,
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false,
+                        stacked: true,
+                        max: <?php echo $total_karyawan; ?>,
+                    },
+                    y: {
+                        display: false,
+                        stacked: true,
+                    }
+                }
+            },
+        };
+
+        new Chart(
+            document.getElementById('gaugeChart'),
+            progressConfig
+        );
+
+        // ===================================================
+        // 2. LINE CHART (Tren Kehadiran Sesi)
+        // ===================================================
+        const lineData = {
+            labels: ['Absensi Pagi', 'Absensi Siang'],
+            datasets: [{
+                label: 'Jumlah Hadir Hari Ini',
+                data: [<?php echo $line_chart_data['pagi']; ?>, <?php echo $line_chart_data['siang']; ?>],
+                fill: false,
+                borderColor: 'rgb(25, 135, 84)',
+                tension: 0.1,
+                pointBackgroundColor: ['rgba(40, 167, 69, 1)', 'rgba(0, 123, 255, 1)'],
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        };
+
+        const lineConfig = {
+            type: 'line',
+            data: lineData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: <?php echo $total_karyawan + 1; ?>,
+                        title: {
+                            display: true,
+                            text: 'Jumlah Karyawan'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        };
+
+        new Chart(
+            document.getElementById('lineChart'),
+            lineConfig
+        );
+    </script>
 </body>
 
 </html>
