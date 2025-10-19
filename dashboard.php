@@ -498,7 +498,7 @@ $conn->close();
     <div class="sidebar" style="width: 230px; background: #2c3e50; min-height: 100vh; padding: 15px 0;">
         <div style="display: flex; justify-content: center; align-items: center; margin-top: 5px;">
             <img src="./asset/pemda.png" alt="Pemda Lotim" width="35px" style="padding: 0 5px;">
-            <img src="./asset/pemda.png" alt="Pemda Lotim" width="35px" style="padding: 0 5px;">
+            <img src="./asset/kkn-logo.jpg" alt="Pemda Lotim" width="35px" style="padding: 0 5px;">
         </div>
 
         <h2 style="text-align: center; color: white; margin: 5px 0;">ABSENSI RFID DESA JURIT</h2>
